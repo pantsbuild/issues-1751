@@ -1,0 +1,9 @@
+# Its a bug that a pants python only project needs this, tracked here:
+#   https://github.com/pantsbuild/pants/issues/940
+
+jar_library(
+  name='nailgun-server',
+  jars=[
+    jar(org='com.martiansoftware', name='nailgun-server', rev='0.9.1')
+  ]
+)
