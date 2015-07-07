@@ -33,6 +33,7 @@ function activate_virtualenv() {
 }
 
 function pyquante_sdist() {
+  # PyQuante is not available on pypi so we build a local sdist.
   local dist_dir=$1
   banner "Building ${PYQUANTE} sdist..."
   tar -xzf ${PYQUANTE}.tar.gz && ( 
@@ -43,6 +44,9 @@ function pyquante_sdist() {
 }
 
 function matplotlib_bdist() {
+  # We must generate a bdist for matplotlib since it has an undeclared dependency on numpy.
+  # To do so - we use the non-standard setupegg.py - the normal setup.py does not support
+  # bdist_egg or bdist_wheel commands.
   local dist_dir=$1
   banner "Building ${SCIPY} egg..."
   tar -xzf ${SCIPY}.tar.gz && (
@@ -53,6 +57,11 @@ function matplotlib_bdist() {
 }
 
 function scipy_bdist() {
+  # We must generate a bdist for scipy since it has an undeclared dependency on numpy (it
+  # makes an attempt at conditionally declaring the dependency but this logic is broken
+  # and backtraces in-practice from within setup.py).
+  # To do so - we use the non-standard setupegg.py - the normal setup.py does not support
+  # bdist_egg or bdist_wheel commands.
   local dist_dir=$1
   banner "Building ${MATPLOTLIB} egg..."
   tar -xzf ${MATPLOTLIB}.tar.gz && (
