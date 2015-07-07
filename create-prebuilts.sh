@@ -42,22 +42,22 @@ function pyquante_sdist() {
   )
 }
 
-function matplotlib_bdist_egg() {
+function matplotlib_bdist() {
   local dist_dir=$1
   banner "Building ${SCIPY} egg..."
   tar -xzf ${SCIPY}.tar.gz && (
     cd ${SCIPY} && \
-    python setupegg.py bdist_egg && \
+    python setupegg.py bdist_wheel && \
     cp -v dist/* ${dist_dir}/
   )
 }
 
-function scipy_bdist_egg() {
+function scipy_bdist() {
   local dist_dir=$1
   banner "Building ${MATPLOTLIB} egg..."
   tar -xzf ${MATPLOTLIB}.tar.gz && (
     cd ${MATPLOTLIB} && \
-    python setupegg.py bdist_egg && \
+    python setupegg.py bdist_wheel && \
     cp -v dist/* ${dist_dir}/
   )
 }
@@ -69,5 +69,5 @@ cd $(git rev-parse --show-toplevel) && \
   mkdir -p ${DIST_DIR} && \
   activate_virtualenv && \
   pyquante_sdist ${DIST_DIR} && \
-  matplotlib_bdist_egg ${DIST_DIR} && \
-  scipy_bdist_egg ${DIST_DIR}
+  matplotlib_bdist ${DIST_DIR} && \
+  scipy_bdist ${DIST_DIR}
