@@ -48,7 +48,7 @@ function matplotlib_bdist() {
   # To do so - we use the non-standard setupegg.py - the normal setup.py does not support
   # bdist_egg or bdist_wheel commands.
   local dist_dir=$1
-  banner "Building ${SCIPY} egg..."
+  banner "Building ${SCIPY} wheel..."
   tar -xzf ${SCIPY}.tar.gz && (
     cd ${SCIPY} && \
     python setupegg.py bdist_wheel && \
@@ -63,7 +63,7 @@ function scipy_bdist() {
   # To do so - we use the non-standard setupegg.py - the normal setup.py does not support
   # bdist_egg or bdist_wheel commands.
   local dist_dir=$1
-  banner "Building ${MATPLOTLIB} egg..."
+  banner "Building ${MATPLOTLIB} wheel..."
   tar -xzf ${MATPLOTLIB}.tar.gz && (
     cd ${MATPLOTLIB} && \
     python setupegg.py bdist_wheel && \
