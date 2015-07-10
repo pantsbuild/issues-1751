@@ -1,3 +1,4 @@
 /.pants.d/
 /dist/
 /prebuilts/*/
+!/prebuilts/centos/

@@ -1,0 +1,71 @@
+# Found via: http://stackoverflow.com/questions/21762988/manually-specify-location-of-vagrant-folder-in-vagrantfile
+VAGRANT_DOTFILE_PATH = '~/.cache/pantsbuild/issues-1751/prebuilts/centos/6.6/x86_64'
+if(ENV['VAGRANT_DOTFILE_PATH'].nil? && '.vagrant' != VAGRANT_DOTFILE_PATH)
+    puts 'changing metadata directory to ' + VAGRANT_DOTFILE_PATH
+    ENV['VAGRANT_DOTFILE_PATH'] = VAGRANT_DOTFILE_PATH
+    puts 'removing default metadata directory ' + FileUtils.rm_r('.vagrant').join("\n")
+    system 'vagrant ' + ARGV.join(' ')
+    ENV['VAGRANT_DOTFILE_PATH'] = nil #for good measure
+    abort 'Finished'
+end
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "chef/centos-6.6"
+  config.vm.synced_folder "../../../..", "/vagrant_data"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+    vb.memory = "1024"
+  end
+  
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+    echo
+    echo "=== Performing custom provisioning ==="
+    echo
+
+    sudo yum -y update
+    sudo yum groupinstall -y development
+
+    # For building python.
+    sudo yum install -y bzip2-devel openssl-devel readline-devel sqlite-devel zlib-devel
+  
+    # For building PyQuante et. al.
+    sudo yum install -y freetype-devel lapack-devel libpng-devel
+
+    # For running pants.
+    wget \
+      --quiet \
+      --no-check-certificate \
+      --no-cookies \
+      --header "Cookie: oraclelicense=accept-securebackup-cookie" \
+      http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-linux-x64.rpm
+    sudo yum -y install jdk-8u45-linux-x64.rpm
+
+    [[ -d ~/.pyenv ]] || (
+      set -e
+      set -o pipefail
+
+      echo "--- Installing python... ---"
+
+      pyenv_staging=$(mktemp -d)
+      staged_pyenv=${pyenv_staging}/.pyenv
+      staged_profile=${pyenv_staging}/.bash_profile
+
+      git clone https://github.com/yyuu/pyenv.git ${staged_pyenv}
+      
+      cp -v ~/.bash_profile ${staged_profile}
+      echo 'export PYENV_ROOT="${HOME}/.pyenv"' >> ${staged_profile}
+      echo 'export PATH="${PYENV_ROOT}/bin:${PATH}"' >> ${staged_profile} 
+      echo 'eval "$(pyenv init -)"' >> ${staged_profile}
+      HOME=${pyenv_staging} source ${staged_profile}
+
+      pyenv install --keep 2.7.10
+      pyenv global 2.7.10
+
+      mv -v ${staged_pyenv} ${staged_profile} ~/
+    ) 
+    
+    echo
+    echo "=== Custom provisioning complete ==="
+  SHELL
+end
